@@ -53,5 +53,5 @@ C33 = math.sqrt(2*gamma3)*S33A
 C_list = [C1, C31, C32, C22, C33]
 
 #Hamiltonian
-H1=D1*(S33A)+D1*S22A - D2*(S22A) + G*S13A.dag()*a +g*a.dag()*S13A + E*a+E*a.dag()
+H1=D1*(S33A)+D1*S22A - D2*(S22A) + G*S13A.dag()*a +g*a.dag()*S13A + E*a+E*a.dag())
 
