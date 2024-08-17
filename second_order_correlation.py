@@ -41,7 +41,7 @@ S22A = S23A*S23A.dag()
 S33A = S23A.dag()*S23A 
 
 #Cavity Operators
-a=tensor(dentroy(N),idatomA)
+a=tensor(destroy(N),idatomA)
 
 #Colapse Operators
 C1 = math.sqrt(2*kappa)*a #cavity mode
@@ -53,5 +53,40 @@ C33 = math.sqrt(2*gamma3)*S33A
 C_list = [C1, C31, C32, C22, C33]
 
 #Hamiltonian
-H1=D1*(S33A)+D1*S22A - D2*(S22A) + G*S13A.dag()*a +g*a.dag()*S13A + E*a+E*a.dag())
+H1=D1*(S33A)+D1*S22A - D2*(S22A) + g*S13A.dag()*a +g*a.dag()*S13A + E*a+E*a.dag()
 
+#Simulação 
+
+def correl(DPlist, Olist):
+    select=np.array(qeye(nloop))
+    for k in range(0,nloop):
+        for l in range(0,nloop):
+            Dp=DPList[k,l]
+            Oc=OList[k,l]
+            H = Oc*S23A + Oc*S23A.dag() + Dp*S11A - Dp*a.dag()*a + H1
+            rhoss=steadystate(H, C_list, method='eigen')
+            Num=expect(a.dag()*a.dag()*a*a, rhoss)
+            Den=expect(a.dag()*a, rhoss) #Transmissão normalizada
+            Cor=Num/(Den**2)
+            Cor= Cor.real
+            select[k,1]=Cor
+        if k%10==0:
+            print(k/10,'%')
+    return select
+
+#PLOT
+DPList, OList = np.meshgrid(DPList, OList)
+C=correl(DPList,OList)
+C=C.real
+
+fig = plt.figure(figsize=(12,12))
+ax = fig.gca(projection='3d')
+
+#Surface
+plt.figure(1, dpi=300)
+surf = ax.plot_surface(OList, DPList, np.log10(np.array(C)),rstride=1,cstride=1, cmap=cm.coolwarn,linewidth=0, antialiased=True)
+#surf = ax.plot_wireframe(OList, DPList, np.log10(np.array(C)),rstride=50,cstride=50, linewidth=1) #gráfico de linhas
+
+fig.colorbar(surf, fraction=0.10, shrink=0.5, pad=0, panchor=(1,1))
+
+plt.show()
